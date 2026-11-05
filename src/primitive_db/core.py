@@ -1,5 +1,6 @@
 ALLOWED_TYPES = {"int", "str", "bool"}
 
+
 def create_table(metadata, table_name, columns):
     if table_name in metadata:
         print(f'Ошибка: Таблица "{table_name}" уже существует.')
@@ -15,6 +16,7 @@ def create_table(metadata, table_name, columns):
     metadata[table_name] = cols
     print(f'Таблица "{table_name}" успешно создана со столбцами: {", ".join(cols)}')
     return metadata
+
 
 def drop_table(metadata, table_name):
     if table_name not in metadata:
