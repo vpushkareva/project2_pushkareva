@@ -56,6 +56,34 @@ def insert(metadata, table_name, values, table_data):
     return table_data
 
 
+def select(table_data, where_clause=None):
+    if where_clause is None:
+        return table_data
+    col, value = list(where_clause.items())[0]
+    return [r for r in table_data if r.get(col) == value]
+
+
+def delete(table_data, where_clause, table_name):
+    if where_clause is None:
+        return table_data
+    col, value = list(where_clause.items())[0]
+    found = [r for r in table_data if r.get(col) == value]
+    for r in found:
+        print(f'Запись с ID={r["ID"]} успешно удалена из таблицы "{table_name}".')
+    return [r for r in table_data if r.get(col) != value]
+
+
+def update(table_data, set_clause, where_clause, table_name):
+    where_col, where_value = list(where_clause.items())[0]
+    set_col, set_value = list(set_clause.items())[0]
+
+    found = [r for r in table_data if r.get(where_col) == where_value]
+    for r in found:
+        r[set_col] = set_value
+        print(f'Запись с ID={r["ID"]} в таблице "{table_name}" успешно обновлена.')
+    return table_data
+
+
 def convert(value, col_type):
     if col_type == "int":
         return int(value)

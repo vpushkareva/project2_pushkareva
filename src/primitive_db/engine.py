@@ -7,6 +7,17 @@ from primitive_db import core, utils
 META_PATH = "db_meta.json"
 
 
+def parse_condition(text, schema):
+    col, value = text.split("=")
+    col = col.strip()
+    value = value.strip().strip('"')
+    for column in schema:
+        col_name, col_type = column.split(":")
+        if col_name == col:
+            return {col: core.convert(value, col_type)}
+    return {col: value}
+
+
 def welcome():
     print("***База данных***")
     print()
