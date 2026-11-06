@@ -1,5 +1,4 @@
 import shlex
-
 import prompt
 
 from primitive_db import core, utils
@@ -8,9 +7,13 @@ META_PATH = "db_meta.json"
 
 
 def welcome():
-    print("***")
+    print("***База данных***")
+    print()
     print("Функции:")
-    print("<command> exit - выйти из программы")
+    print("<command> create_table <имя_таблицы> <столбец1:тип> <столбец2:тип> .. - создать таблицу")  # noqa: E501
+    print("<command> list_tables - показать список всех таблиц")
+    print("<command> drop_table <имя_таблицы> - удалить таблицу")
+    print("<command> exit - выход из программы")
     print("<command> help - справочная информация")
 
 
@@ -28,23 +31,22 @@ def run():
                 break
             case "list_tables":
                 for table_name in meta:
-                    print(f'- "{table_name}".')
+                    print(f"- {table_name}")
             case "create_table":
-                if args[1] is None:
+                if len(args) < 2:
                     print("Введите имя таблицы, некорректная команда.")
                 else:
                     meta = core.create_table(meta, args[1], args[2:])
                     utils.save_metadata(META_PATH, meta)
             case "drop_table":
-                if args[1] is None:
+                if len(args) < 2:
                     print("Введите имя таблицы, некорректная команда.")
                 else:
                     meta = core.drop_table(meta, args[1])
                     utils.save_metadata(META_PATH, meta)
             case _:
-                print(f'«Функции {cmd} нет.Попробуйте снова.»')
+                print(f"Функции {cmd} нет. Попробуйте снова.")
 
-    # src/primitive_db/engine.py
 def print_help():
     """Prints the help message for the current mode."""
 
