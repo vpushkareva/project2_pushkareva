@@ -42,4 +42,4 @@
 
 ## Демонстрация
 
-[![asciicast](https://asciinema.org/a/sgTJ40ujGKdrndbP.svg)](https://asciinema.org/a/sgTJ40ujGKdrndbP)
+[![asciicast](https://asciinema.org/a/CHCI6wrn5qcuks5D.svg)](https://asciinema.org/a/CHCI6wrn5qcuks5D)
