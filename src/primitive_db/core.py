@@ -1,17 +1,17 @@
+from primitive_db.constants import VALID_TYPES
 from primitive_db.decorators import confirm_action, handle_db_errors, log_time
-
-ALLOWED_TYPES = {"int", "str", "bool"}
 
 
 @handle_db_errors
 def create_table(metadata, table_name, columns):
+    """Создаёт таблицу со столбцом ID:int первым, проверяет типы и дубликаты."""
     if table_name in metadata:
         print(f'Ошибка: Таблица "{table_name}" уже существует.')
         return metadata
 
     for col in columns:
         parts = col.split(":")
-        if len(parts) != 2 or parts[1] not in ALLOWED_TYPES:
+        if len(parts) != 2 or parts[1] not in VALID_TYPES:
             print(f"Некорректное значение: {col}. Попробуйте снова.")
             return metadata
 
@@ -24,6 +24,7 @@ def create_table(metadata, table_name, columns):
 @handle_db_errors
 @confirm_action("удаление таблицы")
 def drop_table(metadata, table_name):
+    """Удаляет таблицу из метаданных, спросив подтверждение."""
     if table_name not in metadata:
         print(f'Ошибка: Таблица "{table_name}" не существует.')
         return metadata
@@ -36,6 +37,7 @@ def drop_table(metadata, table_name):
 @handle_db_errors
 @log_time
 def insert(metadata, table_name, values, table_data):
+    """Добавляет запись с автогенерированным ID, проверяя количество и типы."""
     if table_name not in metadata:
         print(f'Ошибка: Таблица "{table_name}" не существует.')
         return table_data
@@ -66,6 +68,7 @@ def insert(metadata, table_name, values, table_data):
 @handle_db_errors
 @log_time
 def select(table_data, where_clause=None):
+    """Возвращает все записи или только совпадающие с условием."""
     if where_clause is None:
         return table_data
     col, value = list(where_clause.items())[0]
@@ -75,6 +78,7 @@ def select(table_data, where_clause=None):
 @handle_db_errors
 @confirm_action("удаление записи")
 def delete(table_data, where_clause, table_name):
+    """Удаляет записи по условию, спросив подтверждение."""
     if where_clause is None:
         return table_data
     col, value = list(where_clause.items())[0]
@@ -89,6 +93,7 @@ def delete(table_data, where_clause, table_name):
 
 @handle_db_errors
 def update(table_data, set_clause, where_clause, table_name):
+    """Обновляет поля записей, найденных по условию."""
     where_col, where_value = list(where_clause.items())[0]
     set_col, set_value = list(set_clause.items())[0]
 
@@ -103,6 +108,7 @@ def update(table_data, set_clause, where_clause, table_name):
 
 
 def convert(value, col_type):
+    """Приводит строковое значение к типу столбца: int, bool или str."""
     if col_type == "int":
         return int(value)
     if col_type == "bool":

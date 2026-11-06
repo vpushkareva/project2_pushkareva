@@ -4,23 +4,13 @@ import prompt
 from prettytable import PrettyTable
 
 from primitive_db import core, utils
+from primitive_db.constants import META_FILE
 from primitive_db.decorators import create_cacher
-
-META_PATH = "db_meta.json"
-
-
-def parse_condition(text, schema):
-    col, value = text.split("=")
-    col = col.strip()
-    value = value.strip().strip('"')
-    for column in schema:
-        col_name, col_type = column.split(":")
-        if col_name == col:
-            return {col: core.convert(value, col_type)}
-    return {col: value}
+from primitive_db.parser import parse_condition, parse_values
 
 
 def print_table(schema, rows):
+    """Печатает записи таблицей с рамками через PrettyTable."""
     table = PrettyTable()
     table.field_names = [c.split(":")[0] for c in schema]
     for row in rows:
@@ -29,6 +19,7 @@ def print_table(schema, rows):
 
 
 def welcome():
+    """Печатает приветственный экран со списком команд."""
     print("***Операции с данными***")
     print()
     print("Функции:")
@@ -43,10 +34,11 @@ def welcome():
 
 
 def run():
+    """Главный цикл: ввод команды, разбор и вызов операций core."""
     welcome()
     cacher = create_cacher()
     while True:
-        meta = utils.load_metadata(META_PATH)
+        meta = utils.load_metadata(META_FILE)
         user_input = prompt.string(">>>Введите команду: ")
         args = shlex.split(user_input)
         cmd = args[0]
@@ -65,7 +57,7 @@ def run():
                     result = core.create_table(meta, args[1], args[2:])
                     if result is not None:
                         meta = result
-                        utils.save_metadata(META_PATH, meta)
+                        utils.save_metadata(META_FILE, meta)
             case "drop_table":
                 if len(args) < 2:
                     print("Введите имя таблицы, некорректная команда.")
@@ -73,7 +65,7 @@ def run():
                     result = core.drop_table(meta, args[1])
                     if result is not None:
                         meta = result
-                        utils.save_metadata(META_PATH, meta)
+                        utils.save_metadata(META_FILE, meta)
             case "insert":
                 if len(args) < 5 or args[1] != "into" or args[3] != "values":
                     print("Некорректная команда insert. Попробуйте снова.")
@@ -85,7 +77,7 @@ def run():
                     if not (raw.startswith("(") and raw.endswith(")")):
                         print("Значения нужно указать в скобках. Попробуйте снова.")
                         continue
-                    values = [v.strip().strip('"') for v in raw[1:-1].split(",")]
+                    values = parse_values(raw)
                     data = utils.load_table_data(table_name)
                     result = core.insert(meta, table_name, values, data)
                     if result is not None:
