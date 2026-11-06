@@ -32,3 +32,7 @@
     exit                                             — выход
 
 Строки пишутся в кавычках, true/false — это bool, ID программа придумывает сама.
+
+## Демонстрация
+
+[![asciicast](https://asciinema.org/a/sgTJ40ujGKdrndbP.svg)](https://asciinema.org/a/sgTJ40ujGKdrndbP)
