@@ -1,7 +1,11 @@
 {
+  "ex": [
+    "ID:int"
+  ],
   "users": [
     "ID:int",
     "name:str",
-    "age:int"
+    "age:int",
+    "is_active:bool"
   ]
 }
