@@ -1,4 +1,5 @@
 import shlex
+
 import prompt
 
 from primitive_db import core, utils
