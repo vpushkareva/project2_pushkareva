@@ -68,6 +68,9 @@ def delete(table_data, where_clause, table_name):
         return table_data
     col, value = list(where_clause.items())[0]
     found = [r for r in table_data if r.get(col) == value]
+    if not found:
+        print("Записи по условию не найдены.")
+        return table_data
     for r in found:
         print(f'Запись с ID={r["ID"]} успешно удалена из таблицы "{table_name}".')
     return [r for r in table_data if r.get(col) != value]
@@ -78,6 +81,9 @@ def update(table_data, set_clause, where_clause, table_name):
     set_col, set_value = list(set_clause.items())[0]
 
     found = [r for r in table_data if r.get(where_col) == where_value]
+    if not found:
+        print("Записи по условию не найдены.")
+        return table_data
     for r in found:
         r[set_col] = set_value
         print(f'Запись с ID={r["ID"]} в таблице "{table_name}" успешно обновлена.')
