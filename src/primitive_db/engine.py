@@ -4,6 +4,7 @@ import prompt
 from prettytable import PrettyTable
 
 from primitive_db import core, utils
+from primitive_db.decorators import create_cacher
 
 META_PATH = "db_meta.json"
 
@@ -43,6 +44,7 @@ def welcome():
 
 def run():
     welcome()
+    cacher = create_cacher()
     while True:
         meta = utils.load_metadata(META_PATH)
         user_input = prompt.string(">>>Введите команду: ")
@@ -60,14 +62,18 @@ def run():
                 if len(args) < 2:
                     print("Введите имя таблицы, некорректная команда.")
                 else:
-                    meta = core.create_table(meta, args[1], args[2:])
-                    utils.save_metadata(META_PATH, meta)
+                    result = core.create_table(meta, args[1], args[2:])
+                    if result is not None:
+                        meta = result
+                        utils.save_metadata(META_PATH, meta)
             case "drop_table":
                 if len(args) < 2:
                     print("Введите имя таблицы, некорректная команда.")
                 else:
-                    meta = core.drop_table(meta, args[1])
-                    utils.save_metadata(META_PATH, meta)
+                    result = core.drop_table(meta, args[1])
+                    if result is not None:
+                        meta = result
+                        utils.save_metadata(META_PATH, meta)
             case "insert":
                 if len(args) < 5 or args[1] != "into" or args[3] != "values":
                     print("Некорректная команда insert. Попробуйте снова.")
@@ -81,8 +87,10 @@ def run():
                         continue
                     values = [v.strip().strip('"') for v in raw[1:-1].split(",")]
                     data = utils.load_table_data(table_name)
-                    data = core.insert(meta, table_name, values, data)
-                    utils.save_table_data(table_name, data)
+                    result = core.insert(meta, table_name, values, data)
+                    if result is not None:
+                        utils.save_table_data(table_name, result)
+                        cacher = create_cacher()
             case "select":
                 if len(args) < 3 or args[1] != "from":
                     print("Некорректная команда select. Попробуйте снова.")
@@ -94,8 +102,13 @@ def run():
                     data = utils.load_table_data(table_name)
                     if "where" in args:
                         where_text = " ".join(args[args.index("where") + 1:])
-                        data = core.select(data, parse_condition(where_text, schema))
-                    print_table(schema, data)
+                        clause = parse_condition(where_text, schema)
+                    else:
+                        where_text = ""
+                        clause = None
+                    key = (table_name, where_text)
+                    rows = cacher(key, lambda: core.select(data, clause))
+                    print_table(schema, rows)
             case "update":
                 if len(args) < 4 or "set" not in args or "where" not in args:
                     print("Некорректная команда update. Попробуйте снова.")
@@ -109,8 +122,10 @@ def run():
                     data = utils.load_table_data(table_name)
                     set_clause = parse_condition(set_text, schema)
                     where_clause = parse_condition(where_text, schema)
-                    data = core.update(data, set_clause, where_clause, table_name)
-                    utils.save_table_data(table_name, data)
+                    result = core.update(data, set_clause, where_clause, table_name)
+                    if result is not None:
+                        utils.save_table_data(table_name, result)
+                        cacher = create_cacher()
             case "delete":
                 if len(args) < 4 or args[1] != "from" or args[3] != "where":
                     print("Некорректная команда delete. Попробуйте снова.")
@@ -122,8 +137,10 @@ def run():
                     where_text = " ".join(args[4:])
                     data = utils.load_table_data(table_name)
                     clause = parse_condition(where_text, schema)
-                    data = core.delete(data, clause, table_name)
-                    utils.save_table_data(table_name, data)
+                    result = core.delete(data, clause, table_name)
+                    if result is not None:
+                        utils.save_table_data(table_name, result)
+                        cacher = create_cacher()
             case "info":
                 if len(args) < 2:
                     print("Введите имя таблицы, некорректная команда.")

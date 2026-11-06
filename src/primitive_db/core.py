@@ -1,6 +1,9 @@
+from primitive_db.decorators import confirm_action, handle_db_errors, log_time
+
 ALLOWED_TYPES = {"int", "str", "bool"}
 
 
+@handle_db_errors
 def create_table(metadata, table_name, columns):
     if table_name in metadata:
         print(f'Ошибка: Таблица "{table_name}" уже существует.')
@@ -18,6 +21,8 @@ def create_table(metadata, table_name, columns):
     return metadata
 
 
+@handle_db_errors
+@confirm_action("удаление таблицы")
 def drop_table(metadata, table_name):
     if table_name not in metadata:
         print(f'Ошибка: Таблица "{table_name}" не существует.')
@@ -28,6 +33,8 @@ def drop_table(metadata, table_name):
     return metadata
 
 
+@handle_db_errors
+@log_time
 def insert(metadata, table_name, values, table_data):
     if table_name not in metadata:
         print(f'Ошибка: Таблица "{table_name}" не существует.')
@@ -56,6 +63,8 @@ def insert(metadata, table_name, values, table_data):
     return table_data
 
 
+@handle_db_errors
+@log_time
 def select(table_data, where_clause=None):
     if where_clause is None:
         return table_data
@@ -63,6 +72,8 @@ def select(table_data, where_clause=None):
     return [r for r in table_data if r.get(col) == value]
 
 
+@handle_db_errors
+@confirm_action("удаление записи")
 def delete(table_data, where_clause, table_name):
     if where_clause is None:
         return table_data
@@ -76,6 +87,7 @@ def delete(table_data, where_clause, table_name):
     return [r for r in table_data if r.get(col) != value]
 
 
+@handle_db_errors
 def update(table_data, set_clause, where_clause, table_name):
     where_col, where_value = list(where_clause.items())[0]
     set_col, set_value = list(set_clause.items())[0]
