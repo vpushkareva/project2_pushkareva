@@ -1,4 +1,4 @@
-from primitive_db.constants import VALID_TYPES
+from primitive_db.constants import ID_COLUMN, VALID_TYPES
 from primitive_db.decorators import confirm_action, handle_db_errors, log_time
 
 
@@ -15,7 +15,7 @@ def create_table(metadata, table_name, columns):
             print(f"Некорректное значение: {col}. Попробуйте снова.")
             return metadata
 
-    cols = ["ID:int"] + columns
+    cols = [ID_COLUMN] + columns
     metadata[table_name] = cols
     print(f'Таблица "{table_name}" успешно создана со столбцами: {", ".join(cols)}')
     return metadata
